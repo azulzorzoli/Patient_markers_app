@@ -13,7 +13,6 @@ library(plotly)
 
 
 
-
 # Creating a user interface (UI) using the Shiny package
 ui <- fluidPage(
   theme = shinytheme("flatly"),  # Apply a predefined theme for a professional look (you can choose different themes)
@@ -96,7 +95,7 @@ server <- function(input, output) {
     therapy <- readxl::read_excel(data_file, sheet = "therapy")
     inflammatory_markers <- readxl::read_excel(data_file,
                                                sheet = "inflammatory_markers",
-                                               col_types = c("date", "text", "numeric", "numeric", "numeric", "numeric"))
+                                               col_types = c("date", "text", "numeric", "numeric", "numeric", "numeric", "numeric"))
     cultures <- readxl::read_excel(data_file, sheet = "cultures")
     
     # create antibiotic factor levels based on minimum start date
@@ -213,7 +212,13 @@ server <- function(input, output) {
       ) +
       geom_rect(
         aes(xmin = as_datetime(x_axis_start_date), xmax = as_datetime(x_axis_end_date),
-            ymin = 39.1, ymax = 40),
+            ymin = 39.1, ymax = 42),
+        fill = alpha("orange", 0.5),
+        color = NA
+      ) +
+      geom_rect(
+        aes(xmin = as_datetime(x_axis_start_date), xmax = as_datetime(x_axis_end_date),
+            ymin = 35, ymax = 34),
         fill = alpha("orange", 0.5),
         color = NA
       ) +
@@ -235,7 +240,7 @@ server <- function(input, output) {
         minor_breaks = minor_breaks_value
       ) +
       scale_y_continuous(
-        limits = c(35.0, 40.0),
+        limits = c(34.0, 40.0),
         expand = c(0, 0),
         oob = scales::oob_keep,
         labels = function(x) {
