@@ -11,8 +11,6 @@ library(shiny)
 library(shinythemes)
 library(plotly)
 
-
-
 # Creating a user interface (UI) using the Shiny package
 ui <- fluidPage(
   theme = shinytheme("flatly"),  # Apply a predefined theme for a professional look (you can choose different themes)
@@ -25,20 +23,15 @@ ui <- fluidPage(
       tags$h3("Upload Data"),  # Header for the sidebar panel
       fileInput("data_file", "Choose Data File"),  # Input file for data upload
       br(),  # Add some space between elements
-      downloadButton("download_data", "Download Sample Data", class = "btn-primary btn-block")  # Button to download sample data
+      downloadLink("download_data", "Download Sample Data", class = "btn-primary btn-block")  # Button to download sample data
     ),
     mainPanel(
-      tableOutput("patient_details_table"),  # Output table for patient details
-      plotOutput("gantt_chart", height = "700px")  # Output plot for Gantt chart with adjusted height
-    ),
+      uiOutput("app_content")  # Output for app content (including image and generated content)
+    )
   )
 )
 
-
-
-
 # Server function
-
 server <- function(input, output) {
   # Reactive expression for the uploaded data
   uploaded_data <- reactive({
@@ -46,7 +39,27 @@ server <- function(input, output) {
     readxl::read_excel(input$data_file$datapath)
   })
   
-  
+  output$app_content <- renderUI({
+    if (is.null(input$data_file)) {
+      # If no file is uploaded, display the image
+      image_url <- "https://raw.githubusercontent.com/azulzorzoli/Patient_markers_app/master/Shiny_app_image_canva.png"
+      tags$img(src = image_url, style = "max-width: 105%; height: auto;")
+    } else {
+      # If a file is uploaded, display the generated content
+      fluidRow(
+        column(
+          width = 12,
+          tableOutput("patient_details_table")  # Output table for patient details
+        ),
+        column(
+          width = 12,
+          plotOutput("gantt_chart", height = "700px")  # Output plot for Gantt chart with adjusted height
+        )
+      )
+    }
+  })
+
+
   
   # Summary of the uploaded data
   data_summary <- reactive({
@@ -95,7 +108,7 @@ server <- function(input, output) {
     therapy <- readxl::read_excel(data_file, sheet = "therapy")
     inflammatory_markers <- readxl::read_excel(data_file,
                                                sheet = "inflammatory_markers",
-                                               col_types = c("date", "text", "numeric", "numeric", "numeric", "numeric", "numeric"))
+                                               col_types = c("date", "text", "numeric", "numeric", "numeric", "numeric"))
     cultures <- readxl::read_excel(data_file, sheet = "cultures")
     
     # create antibiotic factor levels based on minimum start date
@@ -321,7 +334,7 @@ server <- function(input, output) {
         panel.grid.major = element_line(color = "grey", linewidth = 0.3, linetype = 3),
         panel.grid.minor.x = element_line(color = "grey", linewidth = 0.3, linetype = 0),
         axis.text.y = element_blank(),  # Remove the labels from the y-axis
-        legend.position = "top",  # Move the legend to the top
+        legend.position = "bottom",  # Move the legend to the top
         legend.box = "horizontal"    # Set legend orientation to horizontal
       ) +
       guides(
@@ -339,12 +352,7 @@ server <- function(input, output) {
       legend = list(orientation = "h", x = 0.25, y = -0.25)  # Move the legend further down by 1 cm
     )
     
-    # Display the interactive plot
-    plotly_plot
-    
-    
-    
-    
+
     
     # Join plots
     # If no temperature data, it doesn't get plotted
