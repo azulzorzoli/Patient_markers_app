@@ -1,3 +1,5 @@
+
+# Load required libraries
 library(shiny)
 library(ggplot2)
 library(tidyverse)
@@ -5,11 +7,10 @@ library(ggh4x)
 library(egg)
 library(showtext)
 library(rsvg)
-library(shiny)
-library(shinythemes)
-library(shiny)
 library(shinythemes)
 library(plotly)
+library(rsconnect)
+
 
 # Creating a user interface (UI) using the Shiny package
 ui <- fluidPage(
@@ -30,6 +31,8 @@ ui <- fluidPage(
     )
   )
 )
+
+
 
 # Server function
 server <- function(input, output) {
@@ -58,8 +61,17 @@ server <- function(input, output) {
       )
     }
   })
-
-
+  
+  # Download the sample data file
+  output$download_data <- downloadHandler(
+    filename = function() {
+      "sample_data.xlsx"
+    },
+    content = function(file) {
+      fileUrl <- "https://github.com/azulzorzoli/Patient_markers_app/raw/master/sample_data.xlsx"
+      download.file(fileUrl, destfile = file, mode = "wb")
+    }
+  )
   
   # Summary of the uploaded data
   data_summary <- reactive({
@@ -71,6 +83,7 @@ server <- function(input, output) {
     data_summary()
   })
   
+
   output$gantt_chart <- renderPlot({
     # Ensure environment is clear
     rm(list = ls())
@@ -375,3 +388,4 @@ server <- function(input, output) {
 
 # Run the app
 shinyApp(ui = ui, server = server)
+rsconnect::deployApp('path/to/your/app')
